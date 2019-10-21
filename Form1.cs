@@ -296,7 +296,8 @@ namespace H8DReader
                         if (lb.ToString().Contains(".IMD")) ProcessFileImd(file_name);
                         else
                             if (lb.ToString().Contains(".H37")) ProcessFileH37(file_name);
-                    }
+
+                }
 
             }
                 // dcp TODO add .imd capability for H-37 disks
