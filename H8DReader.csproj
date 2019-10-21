@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter.cs" />
+    <Compile Include="CPM\CPMFile.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -210,6 +211,7 @@
     <Compile Include="Z80\Z80.cs" />
     <Compile Include="Z80\Z80Disassembler.cs" />
     <Compile Include="Z80\Z80History.cs" />
+    <None Include="ROMS\2732_mttest2.bin" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
