@@ -153,11 +153,37 @@ namespace H8DUtility
         {
             InitializeComponent();
         }
+        // dcp ROM Search function
+        private void Form4_BootROM()
+        {
+            string[] boot_list = Directory.GetFiles(string.Format(Application.StartupPath + "\\ROMS"),"b_*");
+            if (boot_list.Length == 0)
+            {
+                comboBox1.Items.Add("No Boot ROM File Found");
 
+            }
+            else
+            {
+                foreach (string files in boot_list)
+                {
+                    string file_name;
+                    file_name = files.Substring(files.LastIndexOf("\\") + 1).ToUpper();
+                    comboBox1.Items.Add(file_name);
+
+                }
+            }
+
+           // Stream stream = new FileStream(string.Format("{0}\\ROMS\\2716_444-62_MTR89.BIN", Application.StartupPath), FileMode.Open);
+        }
         private void Form4_Load(object sender, EventArgs e)
         {
-            comboBox1.Items.Add("444-62 (MTR-89)");
+            Form4_BootROM();
+            /* dcp
+             * comboBox1.Items.Add("444-62 (MTR-89)");
+             
             comboBox1.Items.Add("444-142 (MTR-90A)");
+            comboBox1.Items.Add("2732_mttest2");
+            */
             comboBox2.Items.Add("H-9");
             comboBox2.Items.Add("H-19");
             comboBox2.SelectedIndex = 1;
@@ -1836,25 +1862,30 @@ namespace H8DUtility
         private void LoadROM()
         {
             //  load MTR ROM
-            if (comboBox1.SelectedIndex == 0)
+            // dcp add
+            Stream stream1 = new FileStream(string.Format("{0}\\ROMS\\"+comboBox1.Text, Application.StartupPath), FileMode.Open);
+            stream1.Read(H89MEM.Raw, 0x0000, (int)stream1.Length);
+            stream1.Close();
+            /* dcp remove
+             if (comboBox1.SelectedIndex == 0)
             {
                 Stream stream = new FileStream(string.Format("{0}\\ROMS\\2716_444-62_MTR89.BIN", Application.StartupPath), FileMode.Open);
                 stream.Read(H89MEM.Raw, 0x0000, (int)stream.Length);
                 stream.Close();
             }
-            //else if (comboBox1.SelectedIndex == 1)
-            //{
-            //    Stream stream = new FileStream(string.Format("{0}\\ROMS\\2732_444-84_MTR90.ROM", Application.StartupPath), FileMode.Open);
-            //    stream.Read(H89MEM.Raw, 0x0000, (int)stream.Length);
-            //    stream.Close();
-            //}
-            else
+            else if (comboBox1.SelectedIndex == 1)
             {
                 Stream stream = new FileStream(string.Format("{0}\\ROMS\\2732_444-142_MTR90A.ROM", Application.StartupPath), FileMode.Open);
                 stream.Read(H89MEM.Raw, 0x0000, (int)stream.Length);
                 stream.Close();
             }
-
+            else if (comboBox1.SelectedIndex == 2)
+            {
+                Stream stream = new FileStream(string.Format("{0}\\ROMS\\2732_mttest2.bin", Application.StartupPath), FileMode.Open);
+                stream.Read(H89MEM.Raw, 0x0000, (int)stream.Length);
+                stream.Close();
+            }
+            */
             //  load H-17 ROM
             {
                 Stream stream = new FileStream(string.Format("{0}\\ROMS\\2716_444-19_H17.ROM", Application.StartupPath), FileMode.Open);
