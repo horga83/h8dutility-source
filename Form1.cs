@@ -3,9 +3,8 @@ using H8DUtility;
 
 using System;
 using System.Collections;
-using System.Diagnostics.Eventing.Reader;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -113,8 +112,8 @@ namespace H8DReader
 
         private void Form1_Load(object sender, EventArgs e)
             {
-            label6.Text = "Version 1.6";       // version number update Darrell Pelan
-            
+            label6.Text = "Version 1.7 CP/M extract, IMD Read";       // version number update Darrell Pelan
+
             FileViewerBorder = new GroupBox();
             FileViewerBorder.Size = new System.Drawing.Size(720, 580);
             FileViewerBorder.Location = new System.Drawing.Point(90, 30);
@@ -268,25 +267,25 @@ namespace H8DReader
             DiskLabelList.Clear();
 
             if (listBox1.SelectedIndex != -1)
-                // one or more files selected in listbox1
+            // one or more files selected in listbox1
                 {
-                    foreach (var lb in listBox1.SelectedItems)
-                        {
-                        var file_name = label3.Text + "\\" + lb; // path + file name
-                        listBox2.Items.Add(lb.ToString());
-                        if (lb.ToString().Contains(".H8D"))
-                            ProcessFile(file_name);
-                        else
-                            if (lb.ToString().Contains(".IMD")) ProcessFileImd(file_name);
-                            else
-                                if (lb.ToString().Contains(".H37")) ProcessFileH37(file_name);
-                        }
+                foreach (var lb in listBox1.SelectedItems)
+                    {
+                    var file_name = label3.Text + "\\" + lb; // path + file name
+                    listBox2.Items.Add(lb.ToString());
+                    if (lb.ToString().Contains(".H8D"))
+                        ProcessFile(file_name);
+                    else
+                        if (lb.ToString().Contains(".IMD")) ProcessFileImd(file_name);
+                    else
+                            if (lb.ToString().Contains(".H37")) ProcessFileH37(file_name);
+                    }
                 }
-                             // dcp TODO add .imd capability
+            // dcp TODO add .imd capability
             else // no files selected, so process all of them in listbox1
-            {
-                foreach (var lb in listBox1.Items)
                 {
+                foreach (var lb in listBox1.Items)
+                    {
                     var file_name = label3.Text + "\\" + lb;
                     listBox2.Items.Add(lb.ToString());
 
@@ -294,13 +293,13 @@ namespace H8DReader
                         ProcessFile(file_name);
                     else
                         if (lb.ToString().Contains(".IMD")) ProcessFileImd(file_name);
-                        else
+                    else
                             if (lb.ToString().Contains(".H37")) ProcessFileH37(file_name);
 
-                }
+                    }
 
-            }
-                // dcp TODO add .imd capability for H-37 disks
+                }
+            // dcp TODO add .imd capability for H-37 disks
 
             if (FileCount == 0)
                 {
@@ -314,7 +313,7 @@ namespace H8DReader
                 button7.Enabled = true;
                 }
             // dcp changed KB to bytes
-            listBox2.Items.Add(string.Format("Total Files {0}, Total Size {1} bytes", FileCount, TotalSize));
+            listBox2.Items.Add(string.Format("Total Files {0,5:N0}, Total Size {1,5:N0} K", FileCount, TotalSize/1024 ));
             listBox2.Items.Add("");
             }
 
@@ -326,18 +325,43 @@ namespace H8DReader
             return (big_endian_16);
             }
 
+        //******************************* Process File IMD ********************************
         private void ProcessFileImd(string fileName)        // for .IMD disks
-        {
-            const int sectorSize = 2048;
-            byte[] buf = new byte[sectorSize];
-            UTF8Encoding encoding = new UTF8Encoding();
+            {
+            var getCpmFile = new CPMFile(); // create instance of CPMFile, then call function
+            var fileNameList = new List<CPMFile.DirList>();
+            long diskUsed = 0, diskTotal = 0;
+            //var fileNameList = new List <CPMFile.DirList>;
+            var result = getCpmFile.ReadImd(fileName, ref fileNameList, ref diskTotal);
+            int diskFileCnt = 0;
 
-            FileStream file = File.OpenRead(fileName);
-            BinaryReader bin_file = new BinaryReader(file);
-            buf = bin_file.ReadBytes(sectorSize);
+            if (fileNameList.Count > 0)
+                {
+                diskFileCnt = 0;
+                diskUsed = 0;
+                listBox2.Items.Add("======== === ==== =========");
+                listBox2.Items.Add("  FILE   EXT SIZE   FLAGS  ");
+                listBox2.Items.Add("======== === ==== =========");
+                foreach (var f in fileNameList)
+                    {
+                    listBox2.Items.Add(string.Format("{0} {1,4} {2}", f.fname, f.fsize / 1024, f.flags));
+                    diskFileCnt++;
+                    diskUsed += f.fsize;
+                    }
+
+                listBox2.Items.Add("======== === ==== =========");
+                listBox2.Items.Add(string.Format("Files {0}, Total {1,3:N0} K, Free {2,5:N0} K", diskFileCnt, diskUsed/1024, diskTotal - diskUsed/1024));
+                listBox2.Items.Add("");
+                TotalSize += (int)diskUsed;
+                FileCount += diskFileCnt;
+                }
+
+
             }
+        //******************************* Process File H37 ********************************
+
         private void ProcessFileH37(string fileName)        // for .H37 disks
-        {
+            {
             const int sectorSize = 2048;
 
             byte[] buf = new byte[sectorSize];
@@ -347,6 +371,8 @@ namespace H8DReader
             BinaryReader bin_file = new BinaryReader(file);
             buf = bin_file.ReadBytes(sectorSize);
             }
+
+        //***************** Process File **********************
         private void ProcessFile(string file_name)  // for .H8D disks
             {
             const int sector_size = 256;
@@ -1084,18 +1110,19 @@ namespace H8DReader
             }
 
         private void button6_Click(object sender, EventArgs e)
-        {
+            {
             if (MessageBox.Show("Click Yes for an HDOS File, No for CP/M", "DOS File Type", MessageBoxButtons.YesNo) ==
                 DialogResult.Yes)
                 addHDOS(sender, e);
             else
-            {
+                {
                 var cpmFile = new CPMFile();
                 cpmFile.AddFileCPM();
+                }
             }
-        }
 
-        private void addHDOS(object sender, EventArgs e) { 
+        private void addHDOS(object sender, EventArgs e)
+            {
             //  add file
 
             FileStream file = File.OpenRead("EMPTY1S40T.h8d");
