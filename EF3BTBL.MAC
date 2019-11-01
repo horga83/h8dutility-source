@@ -1,0 +1,865 @@
+; EFTBL.MAC
+; Disk format tables for EFORMX Version 1.00
+;
+; Copyright 1986 by Peter Shkabara
+;
+;	ANAPRO
+;	8895 Pino Solo Ave
+;	Atascadero, CA 93422
+;	(805) 466-4284
+;
+; 7-29-86
+;--------------------------------------------------------------
+; 8-5-86
+; fix TRS80 M4 & 80tk DS
+; 8-24-86
+; fix XEROX 820 DD skip count=1
+; 3-23-87
+; add ALTOS 80 trk
+; 8-8-87
+; change MD3 gap3 to 60
+; 4-23-88
+; add CR, LF equ and END statement
+; group formats by track number
+; add side 1 bias, change MD3 gap3 to 95
+; add TKBUF vector
+; fix AMPRO DS format
+; 6-23-88
+; fix CP/M 86 order/move to Z100/delete known bad types
+; 6-30-89
+; add SANYO MBC-2000 format
+; 7-24-89
+; add XEROX 820 DSDD format
+;--------------------------------------------------------------
+; this file is assembled to a REL file and linked onto the end
+; of the EF2.MAC main file.
+;--------------------------------------------------------------
+CR	EQU	0DH
+LF	EQU	0AH
+;--------------------------------------------------------------
+; Begin disk table area
+;--------------------------------------------------------------
+; Heath disk type bit code:
+;
+;	1=DS		16=40 in 80 (double step)
+;	2=DD		32= \
+;	4=XD		64=  > controller type	32 & 64 =H37
+;	8=80TK	       128= /
+;
+SS	EQU	0
+DS	EQU	00000001B
+SD	EQU	0
+DD	EQU	00000010B
+XD	EQU	00000100B
+T80	EQU	00001000B
+STP2	EQU	00010000B
+H37	EQU	01100000B
+;
+				; EMU types
+COMP	EQU	00100000B	; Data is complemetary
+SIDE0	EQU	01000000B	; Up side 1 then up side 2
+SIDE1	EQU	10000000B	; Up side 1 then down side 2
+;
+S128	EQU	0		; sector size designations
+S256	EQU	1
+S512	EQU	2
+S1024	EQU	3
+;--------------------------------------------------------------
+;---------------------------------------------------------------------
+; Revision letter
+;---------------------------------------------------------------------
+REV	EQU	'b'		; Data rev letter
+
+;---------------------------------------------------------------------
+; EMULATE specific equates - these are for the tables
+;---------------------------------------------------------------------
+MAX	EQU	'Z'-40H			;Maximum for menu selection
+
+MSGSZ	EQU	25			;Length of each menu item
+PSIZE	EQU	9+MSGSZ			;Size of EF37 table entry
+
+;---------------------------------------------------------------------
+	DB	REV			; table revision level
+	DB	INDMAX			; number of menus
+	DW	TABLND			; end of tables
+	DW	FDATA-8
+	dw	tkbuf
+TABLE:					; base of tables
+;---------------------------------------------------------------------
+	DB	'ACTRIX         40TK SSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'AMPRO          40TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'AMPRO          40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	24		; GAP3 size
+	DB	40		; TRACKS
+	DB	17		; bias side 0
+	DB	17		; bias side 1
+	DB	DS+DD		; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'BEEHIVE TPR II 40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'CDR Systems    40TK SSXD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	103	;*	; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	3		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'CDR Systems    40TK DSXD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	103	;*	; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	3		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'CROMEMCO       40TK SSSD '
+	DB	18		; physical sectors/track
+	DB	S128		; sector size
+	DB	103	;*	; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+SD		; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'CROMEMCO       40TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'CROMEMCO       40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'Datavue        40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'Davidge        40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'DEC VT180      40TK SSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'EPSON QX-10    40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	4		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+				;IBM CP/M86 40TK SSDD
+	DB	'IBM CP/M86     40TK SSDD '
+	DB	8		; physical sectors/track
+	DB	S512		; sector size
+	DB	119		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+				;FUJITSU CP/M86 40TK DSDD
+	DB	'IBM CP/M86     40TK DSDD '
+	DB	8		; physical sectors/track
+	DB	S512		; sector size
+	DB	103		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'IMS 5000       40TK SSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	21	;*	; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	8		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'KAYPRO II      40TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	0		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	8		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'KAYPRO 4/2X    40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	26		; GAP3 size
+	DB	40		; TRACKS
+	DB	0		; bias side 0
+	DB	10		; bias side 1
+	DB	DS+DD		; type description
+	DB	8		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'MAGNOLIA       40TK SSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	7		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'MAGNOLIA       40TK DSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	7		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'MORROW MD2     40TK SSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	102		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	MORROW		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'MORROW MD3     40TK DSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	95		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	MORROW		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'NCR DecMate V  40TK DSDD '
+	DB	8		; physical sectors/track
+	DB	S512		; sector size
+	DB	126		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	4		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'NEC PC-8001A   40TK SSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	51		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'OSBORNE1       40TK SSSD '
+	DB	10		; physical sectors/track
+	DB	S256		; sector size
+	DB	17		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+SD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'OSBORNE1       40TK SSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	107		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'OTRONA Attache 40TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'PMC MicroMate  40TK DSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	102		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'ROYAL/TRIUMPH  40TK DSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	21		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'SANYO 1100     40TK DSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	51		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'SUPERBRAIN JR  35TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	35		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD+COMP	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'SUPERBRAIN JR  35TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	35		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+COMP	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TELEVIDEO 802  40TK DSDD '
+	DB	18		; physical sectors/track
+	DB	S256		; sector size
+	DB	26		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	3		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'TRS-80/Omikron 40TK SSSD '
+	DB	18		; physical sectors/track
+	DB	S128		; sector size
+	DB	11		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+SD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/3M       40TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4 CP/M+  40TK SSDD '
+	DB	8		; physical sectors/track
+	DB	S512		; sector size
+	DB	22		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	6		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4M       40TK SSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	16		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	2		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4M V1.30 40TK DSDD '
+	DB	18		; physical sectors/track
+	DB	S256		; sector size
+	DB	16		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	4		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4M V1.32 40TK DSDD '
+	DB	18		; physical sectors/track
+	DB	S256		; sector size
+	DB	21		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	2		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4M V1.42 40TK DSDD '
+	DB	18		; physical sectors/track
+	DB	S256		; sector size
+	DB	16		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	2		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'XEROX 820      40TK SSSD '
+	DB	18		; physical sectors/track
+	DB	S128		; sector size
+	DB	11		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+SD		; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'XEROX 820      40TK SSDD '
+	DB	17		; physical sectors/track
+	DB	S256		; sector size
+	DB	38		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'XEROX 820      40TK DSDD '
+	DB	17		; physical sectors/track
+	DB	S256		; sector size
+	DB	24		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+SIDE0	; type description
+	DB	1		; sector skip count - s/b 6 but doesn't work
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+				;IBM CP/M86 old 40TK DSDD also Z100
+	DB	'Z100 CP/M      40TK DSDD '
+	DB	8		; physical sectors/track
+	DB	S512		; sector size
+	DB	119		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'ZORBA          40TK DSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'ALTOS          80TK DSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'AMPRO          80TK DSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	24		; GAP3 size
+	DB	80		; TRACKS
+	DB	17		; bias side 0
+	DB	17		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	5		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'CDR Systems    80TK DSXD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	103	;*	; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	3		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'                         '
+;	DB	'Davidge        80TK DSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	32		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'DEC Rainbow    80TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	24		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	db	'                         '
+;	DB	'Durango Molec  80TK DSDD '	; *** dummy entry
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'EAGLE II       80TK SSDD '
+	DB	5		; physical sectors/track
+	DB	S1024		; sector size
+	DB	102		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	db	'                         '
+;	DB	'IMS 5000       80TK DSDD ' ; *** dummy entry
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	db	'                         '
+;	DB	'IMS 5000x      80TK DSDD ' ; *** dummy entry
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	40		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'MAGNOLIA       80TK DSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	80		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	7		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	db	'                         '
+;	DB	'MULTITECH 503  80TK DSDD '	; *** dummy entry
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	0		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	8		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	db	'                         '
+;	DB	'PIED PIPER     80TK DSDD '	; *** dummy entry
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	39		; GAP3 size
+	DB	40		; TRACKS
+	DB	0		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD		; type description
+	DB	8		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'SANYO MBC-2000 80TK SSDD '
+	DB	16		; physical sectors/track
+	DB	S256		; sector size
+	DB	54		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TELEVIDEO 804  80TK DSDD '
+	DB	9		; physical sectors/track
+	DB	S512		; sector size
+	DB	24		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'TRS80/4M       80TK DSDD '
+	DB	18		; physical sectors/track
+	DB	S256		; sector size
+	DB	22		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	DS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+	DB	'VISUAL 1050    80TK SSDD '
+	DB	10		; physical sectors/track
+	DB	S512		; sector size
+	DB	24		; GAP3 size
+	DB	80		; TRACKS
+	DB	1		; bias side 0
+	DB	1		; bias side 1
+	DB	SS+DD+T80	; type description
+	DB	1		; sector skip count
+	DW	0		; boot track data pointer - 0 if none
+;
+;---------------------------------------------------------------------
+TABLND:	DS	0
+INDMAX	EQU	1+(TABLND-TABLE-1)/(PSIZE*MAX)	; # of menus
+;---------------------------------------------------------------------
+; common usage format data
+;---------------------------------------------------------------------
+FDATA:	DB	32,0E5H,32,0E5H,32,0E5H,32,0E5H
+	DB	64,0E5H,64,0E5H,64,0E5H,64,0E5H
+	DB	128,0E5H,128,0E5H,128,0E5H,128,0E5H
+	DB	0,0E5H,0,0E5H,0,0E5H,0,0E5H
+
+;---------------------------------------------------------------------
+; first sector data
+;---------------------------------------------------------------------
+
+MORROW:	DB	0,0,0,3EH,0C9H,32H,0FFH,0FDH
+	DB	0CDH,0FFH,0FDH,21H,0FEH,0FFH,039H,5EH
+	DB	23H,56H,21H,17H,0,19H,0EBH,31H
+	DB	0,0FFH,0D3H,0F6H,0CDH,3,0,0C3H
+	DB	18H,0,CR,LF,'Not a SYSTEM Diskette',CR,LF
+	DB	0E5H,0E5H,0E5H,0E5H,0E5H
+
+;---------------------------------------------------------------------
+; end of tables
+;---------------------------------------------------------------------
+tkbuf:
+
+	END
+

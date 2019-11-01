@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,7 @@ using System.Windows.Forms;
 using Microsoft.Xna.Framework.Graphics;
 using MarkGwilliam.com.Framework.Convert;
 using Z80;
+
 
 namespace H8DUtility
 {
@@ -1995,11 +1997,19 @@ namespace H8DUtility
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 label1.Text = openFileDialog1.SafeFileName.ToUpper();
-                BinaryReader reader = new BinaryReader(File.Open(openFileDialog1.FileName, FileMode.Open));
-                DiskImage[0].DiskImageBuffer = new byte[reader.BaseStream.Length];
-                reader.Read(DiskImage[0].DiskImageBuffer, 0, (int)reader.BaseStream.Length);
-                reader.Close();
-                SetDiskVolume(0);
+                try
+                {
+                    BinaryReader reader = new BinaryReader(File.Open(openFileDialog1.FileName, FileMode.Open));
+                    DiskImage[0].DiskImageBuffer = new byte[reader.BaseStream.Length];
+                    reader.Read(DiskImage[0].DiskImageBuffer, 0, (int) reader.BaseStream.Length);
+                    reader.Close();
+                    SetDiskVolume(0);
+                }
+                catch
+                {
+                    MessageBox.Show("File I/O Exception", "File Error", MessageBoxButtons.OK);
+                }
+
             }
         }
 
@@ -2018,12 +2028,19 @@ namespace H8DUtility
             openFileDialog1.FileName = "";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                label2.Text = openFileDialog1.SafeFileName.ToUpper();
-                BinaryReader reader = new BinaryReader(File.Open(openFileDialog1.FileName, FileMode.Open));
-                DiskImage[1].DiskImageBuffer = new byte[reader.BaseStream.Length];
-                reader.Read(DiskImage[1].DiskImageBuffer, 0, (int)reader.BaseStream.Length);
-                reader.Close();
-                SetDiskVolume(1);
+                try
+                {
+                    label2.Text = openFileDialog1.SafeFileName.ToUpper();
+                    BinaryReader reader = new BinaryReader(File.Open(openFileDialog1.FileName, FileMode.Open));
+                    DiskImage[1].DiskImageBuffer = new byte[reader.BaseStream.Length];
+                    reader.Read(DiskImage[1].DiskImageBuffer, 0, (int)reader.BaseStream.Length);
+                    reader.Close();
+                    SetDiskVolume(1);
+                }
+                catch 
+                {
+                    MessageBox.Show("File I/O Exception", "File Error", MessageBoxButtons.OK);
+                }
             }
         }
 
@@ -2042,12 +2059,20 @@ namespace H8DUtility
             openFileDialog1.FileName = "";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                label3.Text = openFileDialog1.SafeFileName.ToUpper();
+                try
+                {
+                    label3.Text = openFileDialog1.SafeFileName.ToUpper();
+
                 BinaryReader reader = new BinaryReader(File.Open(openFileDialog1.FileName, FileMode.Open));
                 DiskImage[2].DiskImageBuffer = new byte[reader.BaseStream.Length];
                 reader.Read(DiskImage[2].DiskImageBuffer, 0, (int)reader.BaseStream.Length);
                 reader.Close();
                 SetDiskVolume(2);
+                }
+                catch
+                {
+                    MessageBox.Show("File I/O Exception", "File Error", MessageBoxButtons.OK);
+                }
             }
         }
 
