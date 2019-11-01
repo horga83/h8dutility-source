@@ -112,7 +112,7 @@ namespace H8DReader
 
         private void Form1_Load(object sender, EventArgs e)
             {
-            label6.Text = "Version 1.7 CP/M extract, IMD Read";       // version number update Darrell Pelan
+            label6.Text = "Version 2.0 CP/M extract/Add, IMD Read/Extract";       // version number update Darrell Pelan
 
             FileViewerBorder = new GroupBox();
             FileViewerBorder.Size = new System.Drawing.Size(720, 580);
@@ -257,6 +257,7 @@ namespace H8DReader
                 }
             }
 
+        //*************** Catalog ********************
         private void button2_Click(object sender, EventArgs e)
             {
             //  catalog selected image(s)
@@ -313,7 +314,7 @@ namespace H8DReader
                 button7.Enabled = true;
                 }
             // dcp changed KB to bytes
-            listBox2.Items.Add(string.Format("Total Files {0,5:N0}, Total Size {1,5:N0} K", FileCount, TotalSize/1024 ));
+            listBox2.Items.Add(string.Format("Total Files {0,5:N0}, Total Size {1,5:N0} K", FileCount, TotalSize / 1024));
             listBox2.Items.Add("");
             }
 
@@ -326,13 +327,12 @@ namespace H8DReader
             }
 
         //******************************* Process File IMD ********************************
-        private void ProcessFileImd(string fileName)        // for .IMD disks
+        private void ProcessFileImd(string DiskfileName)        // for .IMD disks
             {
             var getCpmFile = new CPMFile(); // create instance of CPMFile, then call function
-            var fileNameList = new List<CPMFile.DirList>();
+            //var fileNameList = new List<CPMFile.DirList>();
             long diskUsed = 0, diskTotal = 0;
-            //var fileNameList = new List <CPMFile.DirList>;
-            var result = getCpmFile.ReadImd(fileName, ref fileNameList, ref diskTotal);
+            var fileNameList = getCpmFile.ReadImdDir(DiskfileName,  ref diskTotal);
             int diskFileCnt = 0;
 
             if (fileNameList.Count > 0)
@@ -344,13 +344,18 @@ namespace H8DReader
                 listBox2.Items.Add("======== === ==== =========");
                 foreach (var f in fileNameList)
                     {
-                    listBox2.Items.Add(string.Format("{0} {1,4} {2}", f.fname, f.fsize / 1024, f.flags));
                     diskFileCnt++;
                     diskUsed += f.fsize;
+                    DiskFileEntry disk_file_entry = new DiskFileEntry();
+                    disk_file_entry.DiskImageName = DiskfileName;
+                    disk_file_entry.FileName = f.fname;
+                    disk_file_entry.ListBox2Entry = listBox2.Items.Count;
+                    DiskFileList.Add(disk_file_entry);
+                    listBox2.Items.Add(string.Format("{0} {1,4} {2}", f.fname, f.fsize / 1024, f.flags));
                     }
 
                 listBox2.Items.Add("======== === ==== =========");
-                listBox2.Items.Add(string.Format("Files {0}, Total {1,3:N0} K, Free {2,5:N0} K", diskFileCnt, diskUsed/1024, diskTotal - diskUsed/1024));
+                listBox2.Items.Add(string.Format("Files {0}, Total {1,3:N0} K, Free {2,5:N0} K", diskFileCnt, diskUsed / 1024, diskTotal - diskUsed / 1024));
                 listBox2.Items.Add("");
                 TotalSize += (int)diskUsed;
                 FileCount += diskFileCnt;
@@ -705,7 +710,7 @@ namespace H8DReader
                 } while (true);
             }
 
-        // dcp ReadCPMImage for .H8D format
+        //********************  dcp ReadCPMImage for .H8D format
         private void ReadCPMImage(string file_name, ref BinaryReader bin_file, ref UTF8Encoding encoding)
             {
             int fsize = 0;
@@ -1109,6 +1114,7 @@ namespace H8DReader
             button5_Click(sender, e);
             }
 
+        // DCP added option for CP/M file
         private void button6_Click(object sender, EventArgs e)
             {
             if (MessageBox.Show("Click Yes for an HDOS File, No for CP/M", "DOS File Type", MessageBoxButtons.YesNo) ==
@@ -1216,13 +1222,10 @@ namespace H8DReader
             filename8 = filename8.PadRight(8, ' ');
             string ext3 = Path.GetExtension(filename);
             if (string.IsNullOrEmpty(ext3))
-                {
                 ext3 = "   ";
-                }
             else
-                {
                 ext3 = ext3.Substring(1, Math.Min(ext3.Length, 3));
-                }
+
             ext3 = ext3.PadRight(3, ' ');
             InsertHDOSDirEntry(ref diskbuf, ref disk_info, filename8, ext3, len);
 
@@ -1264,9 +1267,7 @@ namespace H8DReader
                     for (int n = 0; n < 8; n++)
                         {
                         if (!z && ((c[n] >= '0' && c[n] <= '9') || (c[n] >= 'A' && c[n] <= 'Z') || c[n] == '-' || c[n] == '_'))
-                            {
                             diskbuf[i++] = (byte)c[n];
-                            }
                         else
                             {
                             diskbuf[i++] = 0;
@@ -1332,22 +1333,34 @@ namespace H8DReader
                 }
             }
 
+        //************************* Extract a file *******************
+        // process a file list from form 1
         private void button7_Click(object sender, EventArgs e)
             {
             //  extract file
             int files_extracted = 0;
+            var getCpmFile = new CPMFile(); // create instance of CPMFile, then call function
+            var diskTotal = 0;
+
+
             int idx = listBox2.SelectedIndex;
             if (idx != -1)
                 {
                 for (int i = 0; i < listBox2.SelectedItems.Count; i++)
                     {
-                    idx = listBox2.SelectedIndices[i];
+                        idx = listBox2.SelectedIndices[i];
                     foreach (DiskFileEntry entry in DiskFileList)
                         {
-                        if (entry.ListBox2Entry == idx)
+                         if (entry.ListBox2Entry == idx)
                             {
                             // dcp changed Extract file to return 1 if successful
-                            files_extracted += ExtractFile(entry.DiskImageName, entry);
+                            if (entry.DiskImageName.Contains(".IMD"))
+                            {
+                                //var fileNameList = getCpmFile.ReadImdDir(entry.DiskImageName, ref diskTotal);
+                                files_extracted += getCpmFile.ExtractFileCPMImd(entry);
+                            }
+                            else
+                                files_extracted += ExtractFile(entry);
                             break;
                             }
                         }
@@ -1360,7 +1373,7 @@ namespace H8DReader
                     {
                     foreach (DiskFileEntry entry in DiskFileList)
                         {
-                        files_extracted += ExtractFile(entry.DiskImageName, entry);
+                        files_extracted += ExtractFile(entry);
                         }
                     }
                 }
@@ -1372,9 +1385,10 @@ namespace H8DReader
                 }
             }
 
-        private int ExtractFile(string disk_image_file, DiskFileEntry disk_file_entry)
+        private int ExtractFile(DiskFileEntry disk_file_entry)
             {
             int result = 1;             // dcp extracted file count to deal with CP/M file extract fail
+            var disk_image_file = disk_file_entry.DiskImageName;
             var file = File.OpenRead(disk_image_file);
             BinaryReader bin_file = new BinaryReader(file);
             byte[] buf = bin_file.ReadBytes(256);
@@ -1493,9 +1507,8 @@ namespace H8DReader
             else
                 {
                 // dcp Add CPM Extract
-
                 var getCpmFile = new CPMFile(); // create instance of CPMFile, then call function
-                result = getCpmFile.ExtractFileCPM(disk_image_file, disk_file_entry);
+                result = getCpmFile.ExtractFileCPM(disk_file_entry);
                 }
 
             return result;

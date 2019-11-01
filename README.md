@@ -13,6 +13,7 @@ Added enhancements to the H8Utility program to better support CP/M Files
   o	Added CP/M capability to Add button for H8D disks
 •	Version 1.70
   o	Added .imd file read capability 
-•	Version 1.8 (in development)
+•	Version 2.0 
   o	Added .IMD CP/M file extraction
-  o	Added .IMD File addition
+
+
